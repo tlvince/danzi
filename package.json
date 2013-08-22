@@ -1,0 +1,32 @@
+{
+  "name": "DanZi",
+  "version": "0.1.0",
+  "description": "A uploader middleware for express application",
+  "main": "index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nevill/danzi.git"
+  },
+  "keywords": [
+    "uploader",
+    "middleware",
+    "connect",
+    "express"
+  ],
+  "author": "Nevill <nevill.dutt@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nevill/danzi/issues"
+  },
+  "devDependencies": {
+    "mocha": "~1.12.0",
+    "express": "~3.3.5"
+  },
+  "dependencies": {
+    "imagemagick": "~0.1.3",
+    "knox": "~0.8.6"
+  }
+}
