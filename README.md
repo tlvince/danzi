@@ -1,7 +1,7 @@
 # DanZi
 
   A uploader middleware for express application.
-  DanZi (担子 dānzǐ in Chinese) means a burden, which is usually used in oral language.
+  DanZi (担子 dàn zǐ in Chinese) means a burden, which is usually used in oral language.
 
 ## Installation
 
