@@ -1,6 +1,6 @@
 {
   "name": "danzi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A uploader middleware for express application",
   "main": "index.js",
   "scripts": {
