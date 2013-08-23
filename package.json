@@ -23,7 +23,8 @@
   },
   "devDependencies": {
     "mocha": "~1.12.0",
-    "express": "~3.3.5"
+    "express": "~3.3.5",
+    "supertest": "~0.7.1"
   },
   "dependencies": {
     "imagemagick": "~0.1.3",
