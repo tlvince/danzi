@@ -29,7 +29,7 @@ describe('post request test', function() {
       .send(param)
       .expect('Content-Type', /json/)
       .expect(200)
-      .expect(JSON.stringify(param), done);
+      .expect(param, done);
   });
 
   it('should parse x-www-form-urlencoded', function(done){
@@ -37,7 +37,7 @@ describe('post request test', function() {
       .post('/')
       .set('Content-Type', 'application/x-www-form-urlencoded')
       .send('user=alice')
-      .expect('{"user":"alice"}', done);
+      .expect({user: "alice"}, done);
   });
 
   describe('with multipart/form-data', function() {
@@ -46,7 +46,7 @@ describe('post request test', function() {
       req
         .post('/')
         .field('user', 'Alice')
-        .expect({"user":"Alice"}, done);
+        .expect({user: "Alice"}, done);
     });
   });
 });
