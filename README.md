@@ -30,6 +30,18 @@ app
   .use(danzi({path: __dirname + '/public/upload'}));
 
 app.post('/upload', function(req, res) {
+  var versions = {
+    thumb: [ 50, 50 ], // [ width, height ] in pixel
+    profile: [ 80, 160 ],
+    hero: [ 100, 225 ]
+  };
+
+  Object.keys(req.files).forEach(function(key) {
+    var file = req.files[key];
+    // set versions for resizing
+    file.versions = versions;
+  });
+
   res.send('Your file is placed at: ' + req.files.file.uri);
 });
 
@@ -42,7 +54,7 @@ node app.js
 
 curl -X POST --form "file=@/path/to/file" "http://localhost:3000/upload"
 ```
-You will find your file is put into directory `public/upload`
+You will find your files are put into directory `public/upload`
 
 ## License
 
