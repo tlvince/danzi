@@ -52,10 +52,10 @@ describe('post request test', function() {
 });
 
 describe('upload a file', function() {
-  it('should has uploaded file', function(done) {
+  xit('should have uploaded a file', function(done) {
     request(app)
       .post('/')
-      .attach('file', __dirname + '/fixture.txt')
+      .attach('file', __dirname + '/fixtures/fixture.txt')
       .expect(200)
       .end(function(err, res) {
         fs.exists(res.text, function(exists) {
@@ -63,6 +63,23 @@ describe('upload a file', function() {
           done();
         });
       });
+  });
+
+  it('should create multiple versions when asked', function(done) {
+    var req = request(app)
+      .post('/')
+      .attach('file', __dirname + '/fixtures/danzi.jpg');
+
+    req.attachments[0].versions = {
+      thumb: [10, 10]
+    }
+
+    req.end(function(err, res) {
+      fs.exists(res.text, function(exists) {
+        assert.equal(exists, true);
+        done();
+      });
+    });
   });
 
   after(function(done) {
