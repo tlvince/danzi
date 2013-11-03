@@ -65,6 +65,18 @@ describe('upload a file', function() {
       });
   });
 
+  it('should use the files SHA1 as its filename', function(done) {
+    var sha1 = '2b720d3ce73c125361b07f3d59879f395711b5cb';
+    request(app)
+      .post('/')
+      .attach('file', __dirname + '/fixture.txt')
+      .expect(200)
+      .end(function(err, res) {
+        assert.equal(res.text, __dirname + '/upload/' + sha1 + '.txt');
+        done();
+      });
+  });
+
   after(function(done) {
     var files = fs.readdirSync(uploadPath);
     for(var key in files) {
