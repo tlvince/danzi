@@ -7,12 +7,14 @@ var danzi = require('..');
 
 var uploadPath = __dirname + '/upload';
 
-var app = express();
+describe('post request test', function() {
+  var app = express();
 
-app
-  .use(express.bodyParser())
-  .use(danzi({ path: uploadPath }))
-  .use(function(req, res) {
+  app
+    .use(express.bodyParser())
+    .use(danzi({ path: uploadPath }));
+
+  app.post('/', function(req, res) {
     if (req.files && req.files.hasOwnProperty('file')) {
       res.send(req.files.file.uri);
     }
@@ -21,7 +23,6 @@ app
     }
   });
 
-describe('post request test', function() {
   it('should response to request param', function(done) {
     var param = { name: "test" };
     request(app)
@@ -49,29 +50,28 @@ describe('post request test', function() {
         .expect({user: "Alice"}, done);
     });
   });
+
+  describe('upload a file', function() {
+    it('should have a uploaded file', function(done) {
+      request(app)
+        .post('/')
+        .attach('file', __dirname + '/fixture.txt')
+        .expect(200)
+        .end(function(err, res) {
+          fs.exists(res.text, function(exists) {
+            assert.equal(exists, true);
+            done();
+          });
+        });
+    });
+  });
 });
 
-describe('upload a file', function() {
-  it('should has uploaded file', function(done) {
-    request(app)
-      .post('/')
-      .attach('file', __dirname + '/fixture.txt')
-      .expect(200)
-      .end(function(err, res) {
-        fs.exists(res.text, function(exists) {
-          assert.equal(exists, true);
-          done();
-        });
-      });
-  });
-
-  after(function(done) {
-    var files = fs.readdirSync(uploadPath);
-    for(var key in files) {
-      fs.unlinkSync(uploadPath + '/' + files[key]);
-    }
-    fs.rmdirSync(uploadPath);
-    done();
-  });
-
+after(function(done) {
+  var files = fs.readdirSync(uploadPath);
+  for(var key in files) {
+    fs.unlinkSync(uploadPath + '/' + files[key]);
+  }
+  fs.rmdirSync(uploadPath);
+  done();
 });
