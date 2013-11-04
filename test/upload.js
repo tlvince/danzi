@@ -1,5 +1,7 @@
 var assert = require('assert'),
+  path = require('path'),
   fs = require('fs'),
+  Emitter = require('events').EventEmitter,
   request = require('supertest'),
   express = require('express');
 
@@ -55,9 +57,44 @@ describe('post request test', function() {
     it('should have a uploaded file', function(done) {
       request(app)
         .post('/')
-        .attach('file', __dirname + '/fixture.txt')
+        .attach('file', __dirname + '/fixture/fixture.txt')
         .expect(200)
         .end(function(err, res) {
+          fs.exists(res.text, function(exists) {
+            assert.equal(exists, true);
+            done();
+          });
+        });
+    });
+  });
+});
+
+describe('multi version test', function() {
+  var versionMonitor = new Emitter();
+  var app = express();
+  app
+    .use(express.bodyParser())
+    .use(danzi({ path: uploadPath }));
+
+  app.post('/', function(req, res) {
+    req.files.file.versions = { thumb: [50, 50] };
+
+    var file = req.files.file.uri;
+    var extname = path.extname(file);
+    var uri = path.join(
+      uploadPath,
+      path.basename(file, extname) + '-thumb' + extname);
+
+    req.files.versionMonitor = versionMonitor;
+    res.send(uri);
+  });
+
+  it('should create multiple versions when asked', function(done) {
+    request(app)
+      .post('/')
+      .attach('file', __dirname + '/fixture/danzi.jpg')
+      .end(function(err, res) {
+        versionMonitor.on('complete', function() {
           fs.exists(res.text, function(exists) {
             assert.equal(exists, true);
             done();
