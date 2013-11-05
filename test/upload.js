@@ -71,22 +71,19 @@ describe('post request test', function() {
 
 describe('multi version test', function() {
   var versionMonitor = new Emitter();
+  var prefix = 'testfile';
+  var nameGenerator = function(file) {
+    return prefix + path.extname(file.name);
+  };
   var app = express();
   app
     .use(express.bodyParser())
-    .use(danzi({ path: uploadPath }));
+    .use(danzi({ path: uploadPath, nameGenerator: nameGenerator }));
 
   app.post('/', function(req, res) {
     req.files.file.versions = { thumb: [50, 50] };
-
-    var file = req.files.file.uri;
-    var extname = path.extname(file);
-    var uri = path.join(
-      uploadPath,
-      path.basename(file, extname) + '-thumb' + extname);
-
     req.files.versionMonitor = versionMonitor;
-    res.send(uri);
+    res.send(200);
   });
 
   it('should create multiple versions when asked', function(done) {
@@ -95,7 +92,8 @@ describe('multi version test', function() {
       .attach('file', __dirname + '/fixture/danzi.jpg')
       .end(function(err, res) {
         versionMonitor.on('complete', function() {
-          fs.exists(res.text, function(exists) {
+          var theFile = path.join(uploadPath, prefix + '-thumb.jpg');
+          fs.exists(theFile, function(exists) {
             assert.equal(exists, true);
             done();
           });
