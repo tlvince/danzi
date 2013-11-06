@@ -18,7 +18,7 @@ describe('post request test', function() {
 
   app.post('/', function(req, res) {
     if (req.files && req.files.hasOwnProperty('file')) {
-      res.send(req.files.file.uri);
+      res.send({uri: req.files.file.uri, name: req.files.file.name });
     }
     else {
       res.json(req.body);
@@ -60,7 +60,11 @@ describe('post request test', function() {
         .attach('file', __dirname + '/fixture/fixture.txt')
         .expect(200)
         .end(function(err, res) {
-          fs.exists(res.text, function(exists) {
+          var info = JSON.parse(res.text);
+          var uri = info.uri;
+          var name = info.name;
+          assert.equal(name, path.basename(uri));
+          fs.exists(uri, function(exists) {
             assert.equal(exists, true);
             done();
           });
@@ -70,34 +74,69 @@ describe('post request test', function() {
 });
 
 describe('multi version test', function() {
-  var versionMonitor = new Emitter();
-  var prefix = 'testfile';
-  var nameGenerator = function(file) {
-    return prefix + path.extname(file.name);
-  };
-  var app = express();
-  app
-    .use(express.bodyParser())
-    .use(danzi({ path: uploadPath, nameGenerator: nameGenerator }));
 
-  app.post('/', function(req, res) {
-    req.files.file.versions = { thumb: [50, 50] };
-    req.files.versionMonitor = versionMonitor;
-    res.send(200);
+  describe('without nameGenerator', function() {
+    var versionMonitor = new Emitter();
+    var app = express();
+    app
+      .use(express.bodyParser())
+      .use(danzi({ path: uploadPath }))
+      .post('/', function(req, res) {
+        req.files.file.versions = { thumb: [50, 50] };
+        req.files.versionMonitor = versionMonitor;
+        res.send(req.files.file.uri);
+      });
+
+    it('should create multiple versions when asked', function(done) {
+      request(app)
+        .post('/')
+        .attach('file', __dirname + '/fixture/danzi.jpg')
+        .end(function(err, res) {
+          versionMonitor.on('complete', function() {
+            var uri = res.text;
+            var extname = path.extname(uri);
+            var theFile = path.join(
+              uploadPath,
+              path.basename(uri, extname) + '-thumb.jpg');
+
+            fs.exists(theFile, function(exists) {
+              assert.equal(exists, true);
+              done();
+            });
+          });
+      });
+    });
   });
 
-  it('should create multiple versions when asked', function(done) {
-    request(app)
-      .post('/')
-      .attach('file', __dirname + '/fixture/danzi.jpg')
-      .end(function(err, res) {
-        versionMonitor.on('complete', function() {
-          var theFile = path.join(uploadPath, prefix + '-thumb.jpg');
-          fs.exists(theFile, function(exists) {
-            assert.equal(exists, true);
-            done();
+  describe('with nameGenerator', function() {
+    var prefix = 'testfile';
+    var nameGenerator = function(file) {
+      return prefix + path.extname(file.name);
+    };
+    var versionMonitor = new Emitter();
+    var app = express();
+    app
+      .use(express.bodyParser())
+      .use(danzi({ path: uploadPath, nameGenerator: nameGenerator }))
+      .post('/', function(req, res) {
+        req.files.file.versions = { thumb: [50, 50] };
+        req.files.versionMonitor = versionMonitor;
+        res.send(200);
+      });
+
+    it('should create multiple versions when asked', function(done) {
+      request(app)
+        .post('/')
+        .attach('file', __dirname + '/fixture/danzi.jpg')
+        .end(function(err, res) {
+          versionMonitor.on('complete', function() {
+            var theFile = path.join(uploadPath, prefix + '-thumb.jpg');
+            fs.exists(theFile, function(exists) {
+              assert.equal(exists, true);
+              done();
+            });
           });
-        });
+      });
     });
   });
 });
