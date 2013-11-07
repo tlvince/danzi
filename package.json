@@ -4,8 +4,8 @@
   "description": "A uploader middleware for express application",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --reporter spec",
-    "test-watch": "./node_modules/mocha/bin/mocha --reporter spec --watch"
+    "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha",
+    "test-watch": "NODE_ENV=test ./node_modules/mocha/bin/mocha --watch"
   },
   "repository": {
     "type": "git",
