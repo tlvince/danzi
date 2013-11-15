@@ -70,6 +70,34 @@ describe('post request test', function() {
           });
         });
     });
+
+    it('should handle multiple attachments', function(done) {
+      var file = __dirname + '/fixture/fixture.txt';
+      request(app)
+        .post('/')
+        .attach('file', file)
+        .attach('second', file)
+        .expect(200)
+        .end(function(err, res) {
+          var info = JSON.parse(res.text);
+          assert.equal(Array.isArray(info), true);
+          assert.equal(info.length, 2);
+        });
+    });
+
+    it('should handle an array of attachments', function(done) {
+      var file = __dirname + '/fixture/fixture.txt';
+      request(app)
+        .post('/')
+        .attach('file', file)
+        .attach('file', file)
+        .expect(200)
+        .end(function(err, res) {
+          var info = JSON.parse(res.text);
+          assert.equal(Array.isArray(info), true);
+          assert.equal(info.length, 2);
+        });
+    });
   });
 });
 
